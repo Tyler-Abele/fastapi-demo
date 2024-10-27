@@ -23,3 +23,7 @@ def multiply(c:int, d: int):
 @app.get("/square/{a}")
 def square(a: float):  # sourcery skip: square-identity
     return {"square": a*a}
+
+@app.get("/fact")
+def zone_apex():
+    return {"The United States AirForce is the largest air force in the world. The second largest air force in the world is the U.S. Navy"}
