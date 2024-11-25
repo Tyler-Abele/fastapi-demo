@@ -7,7 +7,9 @@ import mysql.connector
 from mysql.connector import Error
 import json
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 app = FastAPI()
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,7 +19,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 DBHOST = "ds2022.cqee4iwdcaph.us-east-1.rds.amazonaws.com"
 DBUSER = "ds2022"

@@ -1,3 +1,7 @@
+#security
+.env
+
+
 # pipefile things
 Pipfile
 Pipfile.lock
