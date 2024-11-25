@@ -24,6 +24,7 @@ DBUSER = "ds2022"
 DBPASS = os.getenv('DBPASS')
 DB = "xxe9ff"
 
+#comment so that I can re-run
 @app.get("/genres")
 async def get_genres():
     db = mysql.connector.connect(user=DBUSER, host=DBHOST, password=DBPASS, database=DB)
