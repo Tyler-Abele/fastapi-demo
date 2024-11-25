@@ -21,7 +21,7 @@ app.add_middleware(
 )
 
 DBHOST = "ds2022.cqee4iwdcaph.us-east-1.rds.amazonaws.com"
-DBUSER = "ds2022"
+DBUSER = "admin"
 DBPASS = os.getenv('DBPASS')
 DB = "xxe9ff"
 
