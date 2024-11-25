@@ -1,9 +1,5 @@
 name: container-build
 
-permissions:
-  contents: read
-  packages: write
-  
 on:
   workflow_dispatch:
   push:
