@@ -3,47 +3,77 @@
 from fastapi import FastAPI
 from typing import Optional
 from pydantic import BaseModel
+import mysql.connector
+from mysql.connector import Error
 import json
 import os
 
+
 app = FastAPI()
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+DBHOST = "ds2022.cqee4iwdcaph.us-east-1.rds.amazonaws.com"
+DBUSER = "ds2022"
+DBPASS = os.getenv('DBPASS')
+DB = "xxe9ff"
+
+@app.get("/genres")
+async def get_genres():
+    db = mysql.connector.connect(user=DBUSER, host=DBHOST, password=DBPASS, database=DB)
+    cur=db.cursor()
+    query = "SELECT * FROM genres ORDER BY genreid;"
+    try:
+        cur.execute(query)
+        headers=[x[0] for x in cur.description]
+        results = cur.fetchall()
+        json_data=[] 
+        for result in results:
+            json_data.append(dict(zip(headers,result)))
+        cur.close()
+        db.close()
+        return(json_data)   
+    except Error as e:
+        cur.close()
+        db.close()
+        return {"Error": "MySQL error: " + str(e)}
+
+@app.get('/songs')
+async def get_songs():
+    db = mysql.connector.connect(user=DBUSER, host=DBHOST, password=DBPASS, database=DB)
+    cur=db.cursor()
+    query = "SELECT s.title, s.album, s.artist, s.year, s.file, s.image, s.genre FROM songs s INNER JOIN genres g ON s.genre = g.genreid;"
+    try:
+        cur.execute(query)
+        results = cur.fetchall()
+        songs_data = []
+        for row in results:
+            song = {
+                "title" : row[0],
+                "album" : row[1],
+                "artist" : row[2],
+                "year" : row[3],
+                "file" : row[4],
+                "image" : row[5],
+                "genre" : row[6]
+            }
+            songs_data.append(song)
+        cur.close()
+        db.close()
+        return{"songs" :songs_data}
+    except Error as e:
+        cur.close()
+        db.close()
+        return{"Error" :"MySQL error: " + str(e)}
+
 
 @app.get("/")  # zone apex
 def zone_apex():
-    return {"hello world:>>>"}
+    return {}
 
-@app.get("/add/{a}/{b}")
-def add(a: int, b: int):
-    return {"sum": a + b}
-
-@app.get("/multiply/{c}/{d}")
-def multiply(c:int, d: int):
-    return {"product": c*d}
-
-@app.get("/square/{a}")
-def square(a: float):  # sourcery skip: square-identity
-    return {"square": a*a}
-
-@app.get("/fact")
-def zone_apex():
-    return {"The United States AirForce is the largest air force in the world. The second largest air force in the world is the U.S. Navy"}
-
-@app.get("/oath")
-def zone_apex():
-    return {"ὄμνυμι Ἀπόλλωνα ἰητρὸν καὶ Ἀσκληπιὸν καὶ Ὑγείαν καὶ Πανάκειαν καὶ θεοὺς πάντας τε καὶ πάσας, ἵστορας ποιεύμενος, ἐπιτελέα ποιήσειν κατὰ δύναμιν καὶ κρίσιν ἐμὴν ὅρκον τόνδε καὶ συγγραφὴν τήνδε
-
-ἡγήσεσθαι μὲν τὸν διδάξαντά με τὴν τέχνην ταύτην ἴσα γενέτῃσιν ἐμοῖς, καὶ βίου κοινώσεσθαι, καὶ χρεῶν χρηΐζοντι μετάδοσιν ποιήσεσθαι, καὶ γένος τὸ ἐξ αὐτοῦ ἀδελφοῖς ἴσον ἐπικρινεῖν ἄρρεσι, καὶ διδάξειν τὴν τέχνην ταύτην, ἢν χρηΐζωσι μανθάνειν, ἄνευ μισθοῦ καὶ συγγραφῆς, παραγγελίης τε καὶ ἀκροήσιος καὶ τῆς λοίπης ἁπάσης μαθήσιος μετάδοσιν ποιήσεσθαι υἱοῖς τε ἐμοῖς καὶ τοῖς τοῦ ἐμὲ διδάξαντος, καὶ μαθητῇσι συγγεγραμμένοις τε καὶ ὡρκισμένοις νόμῳ ἰητρικῷ, ἄλλῳ δὲ οὐδενί.
-
-διαιτήμασί τε χρήσομαι ἐπ᾽ ὠφελείῃ καμνόντων κατὰ δύναμιν καὶ κρίσιν ἐμήν, ἐπὶ δηλήσει δὲ καὶ ἀδικίῃ εἴρξειν.
-
-οὐ δώσω δὲ οὐδὲ φάρμακον οὐδενὶ αἰτηθεὶς θανάσιμον, οὐδὲ ὑφηγήσομαι συμβουλίην τοιήνδε: ὁμοίως δὲ οὐδὲ γυναικὶ πεσσὸν φθόριον δώσω.
-
-ἁγνῶς δὲ καὶ ὁσίως διατηρήσω βίον τὸν ἐμὸν καὶ τέχνην τὴν ἐμήν.
-
-οὐ τεμέω δὲ οὐδὲ μὴν λιθιῶντας, ἐκχωρήσω δὲ ἐργάτῃσιν ἀνδράσι πρήξιος τῆσδε.
-
-ἐς οἰκίας δὲ ὁκόσας ἂν ἐσίω, ἐσελεύσομαι ἐπ᾽ ὠφελείῃ καμνόντων, ἐκτὸς ἐὼν πάσης ἀδικίης ἑκουσίης καὶ φθορίης, τῆς τε ἄλλης καὶ ἀφροδισίων ἔργων ἐπί τε γυναικείων σωμάτων καὶ ἀνδρῴων, ἐλευθέρων τε καὶ δούλων.
-
-ἃ δ᾽ ἂν ἐνθεραπείῃ ἴδω ἢ ἀκούσω, ἢ καὶ ἄνευ θεραπείης κατὰ βίον ἀνθρώπων, ἃ μὴ χρή ποτε ἐκλαλεῖσθαι ἔξω, σιγήσομαι, ἄρρητα ἡγεύμενος εἶναι τὰ τοιαῦτα.
-
-ὅρκον μὲν οὖν μοι τόνδε ἐπιτελέα ποιέοντι, καὶ μὴ συγχέοντι, εἴη ἐπαύρασθαι καὶ βίου καὶ τέχνης δοξαζομένῳ παρὰ πᾶσιν ἀνθρώποις ἐς τὸν αἰεὶ χρόνον: παραβαίνοντι δὲ καὶ ἐπιορκέοντι, τἀναντία τούτων."}
