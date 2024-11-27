@@ -70,5 +70,5 @@ async def get_songs():
 
 @app.get("/")  # zone apex
 def zone_apex():
-    return {}
+    return {"howdy"}
 
