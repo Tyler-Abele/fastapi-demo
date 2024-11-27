@@ -56,19 +56,10 @@ async def get_songs():
         results = cur.fetchall()
         songs_data = []
         for row in results:
-            song = {
-                "title" : row[0],
-                "album" : row[1],
-                "artist" : row[2],
-                "year" : row[3],
-                "file" : row[4],
-                "image" : row[5],
-                "genre" : row[6]
-            }
-            songs_data.append(song)
+            json_data.append(dict(zip(headers,result)))
         cur.close()
         db.close()
-        return{"songs" :songs_data}
+        return{"songs" :json_data}
     except Error as e:
         cur.close()
         db.close()
