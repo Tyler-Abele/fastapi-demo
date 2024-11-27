@@ -50,12 +50,14 @@ async def get_genres():
 async def get_songs():
     db = mysql.connector.connect(user=DBUSER, host=DBHOST, password=DBPASS, database=DB)
     cur=db.cursor()
-    query = "SELECT s.title, s.album, s.artist, s.year, s.file, s.image, s.genre FROM songs s INNER JOIN genres g ON s.genre = g.genreid;"
+    query = "SELECT songs.title, songs.album, songs.artist, songs.year, songs.file, songs.image, genres.genre FROM songs JOIN genres WHERE songs.genre = genres.genreid;"
     try:
         cur.execute(query)
+        
         results = cur.fetchall()
-        songs_data = []
-        for row in results:
+        headers=[x[0] for x in cur.description]
+        json_data = []
+        for result in results:
             json_data.append(dict(zip(headers,result)))
         cur.close()
         db.close()
